@@ -1,0 +1,25 @@
+version: '3'
+services:
+  api-by-pass-cloudflare:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - flaresolverr
+    networks:
+      - api-by-pass-cloudflare
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    # ports:
+    #   - "8191:8191"
+    restart: unless-stopped
+    networks:
+      - api-by-pass-cloudflare
+
+networks:
+  api-by-pass-cloudflare:
+  
