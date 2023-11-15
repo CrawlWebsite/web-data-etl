@@ -1,12 +1,13 @@
+import requests
 import undetected_chromedriver as uc
 import time 
-import xlwt
-
-from xlwt import Workbook
+import re
 from selenium.webdriver.common.by import By 
-from datetime import date
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from datetime import date
 
 # Define a custom user agent
 my_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
@@ -22,77 +23,50 @@ driver = uc.Chrome(options=options)
 today = date.today()
 
 url_crawl = "https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex"
-driver.get(f"http://localhost:3000/?path={url_crawl}")
+driver.get(f"http://localhost:3000/?cmd=get&path={url_crawl}")
 time.sleep(5)
 
 elements = driver.find_elements(By.CLASS_NAME, "js__product-link-for-product-id")
 
-# get list element in page
+# Get list element in page
 lst = [element.get_attribute("href") for element in elements]
 
-wb = Workbook()
-sheet1 = wb.add_sheet('Sheet 1')
+# Sale list
+sales = []
 
-print(lst)
+for url in lst:
+    try: 
+        url_new = url.replace('http://localhost:3000','http://localhost:3000/?cmd=get&path=https://batdongsan.com.vn')
+        driver.get(url_new)
 
-# cnt = 0
-# for itm in lst: 
-#     if itm == None or itm == "":
-#         continue
+        # Get name
+        nameElement = driver.find_elements(By.CSS_SELECTOR, "div.re__contact-name.js_contact-name")[0]
+        name = nameElement.get_attribute('title')
+        
+        # Get phone raw
+        phoneElement = driver.find_elements(By.CSS_SELECTOR, 'div.phone.js__phone')[0]
+        phone_raw = phoneElement.get_attribute('raw')
 
-#     try:
-#         driver.get(itm) # go to each detail page
-#         time.sleep(3)
-#     except:
-#         print(itm)
-#         wb.save('batdongsang.com.vn.xlsx')
+        # Call API to decrypt phone raw
+        url_crawl_phone = "https://batdongsan.com.vn/Product/ProductDetail/DecryptPhone"
+        driver.get(f"http://localhost:3000/?path={url_crawl_phone}&postData=PhoneNumber={phone_raw}&cmd=post")
 
-#     title = driver.find_element(By.CSS_SELECTOR, "h1[class*=title]").text
-#     path_menu = driver.find_element(By.CSS_SELECTOR, "[class*=re__breadcrumb]").text
+        # Get phone
+        phone_number = driver.find_elements(By.CSS_SELECTOR, 'pre')[0].get_attribute('innerHTML')
+        phone_number = re.sub(r'\s', '', phone_number)
 
-#     province = None
-#     district = None
+        sales.append({
+            'name': name, 
+            'phone': phone_number
+        })
 
-#     try:
-#         path_menu_lst = path_menu.split("/")
-#         province = path_menu_lst[1]
-#         district = path_menu_lst[2]
-#     except:
-#         province = None
-#         district = None
+        print("Crawl success: " + url_new)
+    except Exception as ex:
+        print("Crawl failure: " + url_new)
+        print(ex)
 
-#     address = driver.find_element(By.CSS_SELECTOR, "h1 + span").text
-#     description = driver.find_element(By.CSS_SELECTOR, "[class*=re__pr-description] > div").text
 
-#     phone_number = None
-#     try:
-#         phone_number = driver.find_element(By.CSS_SELECTOR, "[class*=re__pr-scrollbar-tablet] > a").get_attribute("data-href")
-#         phone_number = phone_number.replace("sms://", "")
-#         phone_number = phone_number.split("/")[0]
-#     except: 
-#         phone_number = None
-
-#     owner = driver.find_element(By.CSS_SELECTOR, "[class*=re__contact-name] > a").text
-    
-#     print("Title: " + title)
-#     print("Path Menu: " + path_menu)
-#     print("Address: " + address)
-#     print("Description: " + description)
-#     print("Phone Number: " + phone_number)
-#     print("Owner: " + owner)
-
-#     sheet1.write(cnt, 0, today.strftime("%d/%m/%Y"))
-#     sheet1.write(cnt, 1, title)
-#     sheet1.write(cnt, 2, path_menu)
-#     sheet1.write(cnt, 3, province)
-#     sheet1.write(cnt, 4, district)
-#     sheet1.write(cnt, 5, address)
-#     sheet1.write(cnt, 6, description)
-#     sheet1.write(cnt, 7, phone_number)
-#     sheet1.write(cnt, 8, owner)
-
-#     cnt += 1
-
-# wb.save('batdongsan.xlsx')
+# Insert sale data to database
+requests.post(f"http://localhost:3000/user/bulk", json={'users': sales})
 
 driver.close()
