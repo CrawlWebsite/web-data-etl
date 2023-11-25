@@ -1,4 +1,5 @@
 import requests
+from collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
 import undetected_chromedriver as uc
 import time 
 import re
@@ -21,6 +22,19 @@ options.add_argument(f"user-agent={my_user_agent}")
 driver = uc.Chrome(options=options)
  
 today = date.today()
+
+
+strategy = BatDongSanStrategy(url='https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex')
+
+strategy.getPageContent()
+
+
+
+
+
+
+
+
 
 url_crawl = "https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex"
 driver.get(f"http://localhost:3000/?cmd=get&path={url_crawl}")
