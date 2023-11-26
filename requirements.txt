@@ -37,3 +37,4 @@ websocket-client==1.5.1
 websockets==11.0.3
 requests
 selenium==4.15.2
+click==8.1.7

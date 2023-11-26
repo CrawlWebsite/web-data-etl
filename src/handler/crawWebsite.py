@@ -1,0 +1,2 @@
+def crawlWebsiteHandler():
+    print("Cleaning")
