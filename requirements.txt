@@ -35,3 +35,5 @@ urllib3
 virtualenv==20.23.0
 websocket-client==1.5.1
 websockets==11.0.3
+requests
+selenium==4.15.2

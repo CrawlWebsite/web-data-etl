@@ -1,18 +1,26 @@
+from entity.sale import Sale
+from selenium.webdriver.common.by import By 
 from core.real_estate.realEstateStrategy import RealEstateStrategy
-from src.collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
+from collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
 
 
 class BatDongSanStrategy(RealEstateStrategy):
     website: BatDongSanWebsite
-
+    sale: Sale
+    
     def __init__(self, url):
         self.website = BatDongSanWebsiteFactory.create(url)
+        self.sale = Sale()
+
    
-    def getPageContent():
-        super().getPageContent()
+    def crawlName(self):
+        name = self.website.crawlName()
+        self.sale.setName(name)
 
-    def crawlName():
-        super().crawlName()
 
-    def crawlPhoneNumber():
-        super().crawlPhoneNumber()
+    def crawlPhoneNumber(self):
+        self.website.crawlPhoneNumber()
+
+    def excuteCrawl(self):
+        self.crawlName()
+        self.crawlPhoneNumber()
