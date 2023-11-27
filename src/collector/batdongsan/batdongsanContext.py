@@ -12,6 +12,7 @@ class BatDongSanContext:
 
     def __init__(self, url):
         self.mainStrategy = BatDongSanStrategy(url=url)
+        self.salePostStrategy = None
 
     def setSalePostStrategy(self, strategy):
         self.salePostStrategy = strategy
@@ -22,11 +23,16 @@ class BatDongSanContext:
         print(self.salePostUrls)
 
     def excuteCrawl(self):
+        self.crawlSalePostUrls()
+        
         for salePostUrl in self.salePostUrls:
             url_new = salePostUrl.replace('http://localhost:3000','https://batdongsan.com.vn')
 
-            print(url_new)
-            strategy = BatDongSanStrategy(url=url_new)
-            self.setSalePostStrategy(strategy=strategy)
+            if self.salePostStrategy is None:
+                strategy = BatDongSanStrategy(url=url_new)
+                self.setSalePostStrategy(strategy=strategy)
+            else:
+                self.salePostStrategy.changeWebsite(url_new)
+           
             self.salePostStrategy.excuteCrawl()
-            print(self.salePostStrategy.sale)
+            print(self.salePostStrategy.sale.__dict__)
