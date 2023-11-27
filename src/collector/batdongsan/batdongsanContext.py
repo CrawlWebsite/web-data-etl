@@ -32,7 +32,7 @@ class BatDongSanContext:
                 strategy = BatDongSanStrategy(url=url_new)
                 self.setSalePostStrategy(strategy=strategy)
             else:
-                self.salePostStrategy.changeUrl(url_new)
+                self.salePostStrategy.changeWebsite(url_new)
            
             self.salePostStrategy.excuteCrawl()
             print(self.salePostStrategy.sale.__dict__)
