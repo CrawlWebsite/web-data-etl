@@ -42,7 +42,7 @@ class BatDongSanStrategy(RealEstateStrategy):
         
         for infoElement in infoElements:
             infoSpans = infoElement.find_elements(By.CSS_SELECTOR, 'span')[0]
-            print(infoSpans.get_attributes('class'))
+            print(infoSpans.get_attribute('class'))
 
 
     def crawlName(self):
