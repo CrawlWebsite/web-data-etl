@@ -1,4 +1,6 @@
 import re
+from core.web_driver.webDriver import WebDriver
+from entity.apartment import ApartmentAddress
 from entity.sale import Sale
 from selenium.webdriver.common.by import By 
 from core.real_estate.realEstateStrategy import RealEstateStrategy
@@ -11,10 +13,37 @@ class BatDongSanStrategy(RealEstateStrategy):
 
     def __init__(self, url):
         self.website = BatDongSanWebsiteFactory.create(url)
+      
+        self.phoneDecryptDriver = WebDriver()
+        self.phoneDecryptUrl = 'https://batdongsan.com.vn/Product/ProductDetail/DecryptPhone'
+
         self.sale = Sale()
-   
+        self.apartmentAddress = ApartmentAddress()
+
     def changeWebsite(self, url):
         self.website.changeUrl(url)
+
+    def crawlSale(self):
+        self.crawlName()
+        self.crawlPhoneNumber()
+
+    def crawlApartmentAddress(self):
+        addressElements = self.website.getElementByCssSelector(css_selector='div.js__breadcrumb a')
+
+        for addressElement in addressElements:
+            level = addressElement.get_attribute('level')
+            value = addressElement.get_attribute('innerHTML')
+
+            self.updateApartmentAddressByLevel(level, value)
+    
+
+    def crawlApartmentInfo(self):
+        infoElements = self.website.getElementByCssSelector(css_selector='div.re__pr-specs-content-item')
+        
+        for infoElement in infoElements:
+            infoSpans = infoElement.find_elements(By.CSS_SELECTOR, 'span')[0]
+            print(infoSpans.get_attributes('class'))
+
 
     def crawlName(self):
         nameElement = self.website.getElementByCssSelector("div.re__contact-name.js_contact-name")
@@ -37,15 +66,22 @@ class BatDongSanStrategy(RealEstateStrategy):
         print(phoneRaw)
 
         # Call API to decrypt phone raw
-        url_crawl = 'https://batdongsan.com.vn/Product/ProductDetail/DecryptPhone'
-        self.website.phoneDecryptDriver.getPageContent(cmd='post', url_crawl=url_crawl, postData=f'PhoneNumber={phoneRaw}')
+        self.phoneDecryptDriver.getPageContent(cmd='post', url_crawl=self.phoneDecryptUrl, postData=f'PhoneNumber={phoneRaw}')
 
         # Get phone
-        phoneNumber = self.website.phoneDecryptDriver.getElementByCssSelector(css_selector='pre')[0].get_attribute('innerHTML')
+        phoneNumber = self.phoneDecryptDriver.getElementByCssSelector(css_selector='pre')[0].get_attribute('innerHTML')
         phoneNumber = re.sub(r'\s', '', phoneNumber)
 
         self.sale.setPhoneNumber(phoneNumber)
 
+    def updateApartmentAddressByLevel(self, level, value):
+        match level:
+            case "2":
+                self.apartmentAddress.setCity(value)
+            case "3":
+                self.apartmentAddress.setDistrict(value)
+
     def excuteCrawl(self):
-        self.crawlName()
-        self.crawlPhoneNumber()
+        self.crawlSale()
+        self.crawlApartmentInfo()
+        self.crawlApartmentAddress()

@@ -8,10 +8,10 @@ from handler.crawWebsite import crawlWebsiteHandler
 
 @click.command()
 @click.option('--url', help='The website URL to crawl')
-@click.option('--pageStart', help='The page that will be started')
-@click.option('--pageEnd', help='The page that will be ended')
-def crawlWebsite(url, pageStart, pageEnd):
-    crawlWebsiteHandler(url, pageStart, pageEnd)
+@click.option('--page_start', help='The page that will be started', default=None)
+@click.option('--page_end', help='The page that will be ended', default=None)
+def crawlWebsite(url, page_start, page_end):
+    crawlWebsiteHandler(url, page_start, page_end)
 
 if __name__ == '__main__':
     crawlWebsite()

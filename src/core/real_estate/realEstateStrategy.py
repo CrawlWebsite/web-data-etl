@@ -1,13 +1,21 @@
 from abc import ABC, abstractmethod
-class RealEstateStrategy(ABC):
+
+class RealEstateStrategy():
     @abstractmethod
     def changeWebsite(self, url):
         pass
 
     @abstractmethod
-    def crawlName(self):
+    def crawlSale(self):
         pass
 
     @abstractmethod
-    def crawlPhoneNumber(self):
+    def crawlApartmentAddress(self):
         pass
+
+    @abstractmethod
+    def crawlApartmentInfo(self):
+        pass
+    
+
+    
