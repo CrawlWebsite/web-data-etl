@@ -1,20 +1,17 @@
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By 
+import time 
 
 class WebDriver: 
     def __init__(self):
-        # Define a custom user agent
-        my_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
-        
-        # Set up Chrome options
         options = uc.ChromeOptions()
-        options.add_argument("--headless")
-        options.add_argument(f"user-agent={my_user_agent}")
-        options.add_argument("--disable-web-security")
-        options.add_argument("--allow-file-access-from-files")
-        options.add_argument("--allow-file-access")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
+
+        # Set options to make the ChromeDriver less detectable
+        options.add_argument('--headless')  # Run Chrome in headless mode (without GUI)
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--blink-settings=imagesEnabled=false')  # Disable loading of images
+        options.add_argument('--enable-blink-features=DisableJavaScript')  # Disable JavaScript execution
 
         # Initialize Chrome WebDriver with the specified options
         self.driver = uc.Chrome(options=options)
@@ -25,6 +22,8 @@ class WebDriver:
             url = url + f'&postData={postData}'
 
         self.driver.get(url)
+        time.sleep(2)
+        print(f"Get page {url_crawl} successful")
 
     
     def getElementByClass(self, className):

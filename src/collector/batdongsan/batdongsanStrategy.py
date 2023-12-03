@@ -1,6 +1,7 @@
 import re
+from config.logger import LoggerCustom
 from core.web_driver.webDriver import WebDriver
-from entity.apartment import ApartmentAddress
+from entity.apartment import ApartmentAddress, ApartmentInfo
 from entity.sale import Sale
 from selenium.webdriver.common.by import By 
 from core.real_estate.realEstateStrategy import RealEstateStrategy
@@ -12,6 +13,7 @@ class BatDongSanStrategy(RealEstateStrategy):
     sale: Sale
 
     def __init__(self, url):
+        self.logger = LoggerCustom(BatDongSanStrategy.__name__)
         self.website = BatDongSanWebsiteFactory.create(url)
       
         self.phoneDecryptDriver = WebDriver()
@@ -19,30 +21,59 @@ class BatDongSanStrategy(RealEstateStrategy):
 
         self.sale = Sale()
         self.apartmentAddress = ApartmentAddress()
+        self.apartmentInfo = ApartmentInfo()
 
     def changeWebsite(self, url):
         self.website.changeUrl(url)
 
     def crawlSale(self):
+        self.logger.info("Crawling sale ...")
+
         self.crawlName()
         self.crawlPhoneNumber()
 
+        self.logger.info("Crawling sale successfully")
+
     def crawlApartmentAddress(self):
+        self.logger.info("Crawling address ...")
+
         addressElements = self.website.getElementByCssSelector(css_selector='div.js__breadcrumb a')
 
+        # Crawl city and district
         for addressElement in addressElements:
             level = addressElement.get_attribute('level')
             value = addressElement.get_attribute('innerHTML')
 
             self.updateApartmentAddressByLevel(level, value)
     
+        # Crawl project
+        projectElement = self.website.getElementByCssSelector(css_selector='div.re__project-title')[0]
+        project = projectElement.get_attribute('innerHTML')
+        self.apartmentAddress.setProject(project)
+
+        # Crawl address
+        addressElement = self.website.getElementByCssSelector(css_selector='span.js__pr-address')[0]
+        address = addressElement.get_attribute('innerHTML')
+        self.apartmentAddress.setAddress(address)
+
+        self.logger.info("Crawling address successfully")
+
 
     def crawlApartmentInfo(self):
+        self.logger.info("Crawling information ...")
+
         infoElements = self.website.getElementByCssSelector(css_selector='div.re__pr-specs-content-item')
         
         for infoElement in infoElements:
-            infoSpans = infoElement.find_elements(By.CSS_SELECTOR, 'span')[0]
-            print(infoSpans.get_attribute('class'))
+            iconElement = infoElement.find_elements(By.CSS_SELECTOR, 'span i')[0]
+            iconClass = iconElement.get_attribute('class')
+
+            valueElement = infoElement.find_elements(By.CSS_SELECTOR, 'span.re__pr-specs-content-item-value')[0]
+            value = valueElement.get_attribute('innerHTML')
+
+            self.updateApartmentInfoByIconClass(iconClass, value)
+
+        self.logger.info("Crawling information successfully")
 
 
     def crawlName(self):
@@ -81,7 +112,29 @@ class BatDongSanStrategy(RealEstateStrategy):
             case "3":
                 self.apartmentAddress.setDistrict(value)
 
+    def updateApartmentInfoByIconClass(self, iconClass, value):
+        match iconClass:
+            case "re__icon-size":
+                self.apartmentInfo.setAcreage(value)
+            case "re__icon-front-view":
+                self.apartmentInfo.setBalconyDirection(value)
+            case "re__icon-private-house":
+                self.apartmentInfo.setApartmentDirection(value)
+            case "re__icon-bedroom":
+                self.apartmentInfo.setNumberOfBedRoom(value)
+            case "re__icon-bath":
+                self.apartmentInfo.setNumberOfToilet(value)
+            case "re__icon-document":
+                self.apartmentInfo.setJuridical(value)
+            case "re__icon-interior": 
+                self.apartmentInfo.setInterior(value)
+            case "re__icon-apartment":
+                self.apartmentInfo.setNumberOfFloor(value)
+
     def excuteCrawl(self):
-        self.crawlSale()
-        self.crawlApartmentInfo()
-        self.crawlApartmentAddress()
+        try:
+            self.crawlSale()
+            self.crawlApartmentInfo()
+            self.crawlApartmentAddress()
+        except Exception as ex:
+            print("Exception: ", ex)

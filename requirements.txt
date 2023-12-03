@@ -38,3 +38,5 @@ websockets==11.0.3
 requests
 selenium==4.15.2
 click==8.1.7
+coloredlogs==15.0.1
+kafka-python==2.0.2

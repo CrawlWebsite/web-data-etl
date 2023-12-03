@@ -47,3 +47,4 @@ class BatDongSanContext:
         self.salePostStrategy.excuteCrawl()
         print(self.salePostStrategy.sale.__dict__)
         print(self.salePostStrategy.apartmentAddress.__dict__)
+        print(self.salePostStrategy.apartmentInfo.__dict__)
