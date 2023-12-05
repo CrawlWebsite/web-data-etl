@@ -1,0 +1,39 @@
+name: Web collector staging CI/CD
+
+on:
+  push:
+    branches: ['stg']
+
+env:
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  REPO_NAME: ${{secrets.REPO_NAME}}
+  IMAGE_TAG: ${{secrets.IMAGE_TAG_BE}}
+  SERVICE_NAME: web-collector
+  COMPOSE_FILE: docker-compose.stg.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: stg
+    strategy:
+      matrix:
+        python-version: [3.10]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          node-version: ${{ matrix.python-version }}
+
+      - name: Docker login
+        run: | # log into docker hub account
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+      # Build & Push the Docker image
+      - name: Build & Push the Docker image
+        run: |
+          docker build -t $DOCKER_USER/$REPO_NAME:$IMAGE_TAG . &&
+          docker push $DOCKER_USER/$REPO_NAME:$IMAGE_TAG

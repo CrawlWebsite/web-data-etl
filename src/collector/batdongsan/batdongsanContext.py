@@ -1,7 +1,5 @@
 from collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
 from selenium.webdriver.common.by import By 
-from core.real_estate.realEstateStrategy import RealEstateStrategy
-from collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
 
 
 class BatDongSanContext:

@@ -1,10 +1,13 @@
 import re
 from config.logger import LoggerCustom
+from selenium.webdriver.common.by import By 
+
 from core.web_driver.webDriver import WebDriver
+from core.real_estate.realEstateStrategy import RealEstateStrategy
+
 from entity.apartment import ApartmentAddress, ApartmentInfo
 from entity.sale import Sale
-from selenium.webdriver.common.by import By 
-from core.real_estate.realEstateStrategy import RealEstateStrategy
+
 from collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
 
 
