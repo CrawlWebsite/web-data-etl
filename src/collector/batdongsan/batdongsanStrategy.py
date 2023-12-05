@@ -139,5 +139,9 @@ class BatDongSanStrategy(RealEstateStrategy):
             self.crawlSale()
             self.crawlApartmentInfo()
             self.crawlApartmentAddress()
+
+            print(self.sale.__dict__)
+            print(self.apartmentAddress.__dict__)
+            print(self.apartmentInfo.__dict__)
         except Exception as ex:
             print("Exception: ", ex)

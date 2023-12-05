@@ -1,5 +1,8 @@
 from collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
-from selenium.webdriver.common.by import By 
+from selenium.webdriver.common.by import By
+from worker_pool.pool import Pool
+
+from worker_pool.task import Task
 
 
 class BatDongSanContext:
@@ -9,8 +12,10 @@ class BatDongSanContext:
     salePostUrls: list
 
     def __init__(self, url):
+        self.pool = Pool()
         self.mainStrategy = BatDongSanStrategy(url=url)
         self.salePostStrategy = None
+
 
     def setSalePostStrategy(self, strategy):
         self.salePostStrategy = strategy
@@ -26,23 +31,10 @@ class BatDongSanContext:
         for salePostUrl in self.salePostUrls:
             url_new = salePostUrl.replace('http://localhost:3000','https://batdongsan.com.vn')
 
-            if self.salePostStrategy is None:
-                strategy = BatDongSanStrategy(url=url_new)
-                self.setSalePostStrategy(strategy=strategy)
-            else:
-                self.salePostStrategy.changeWebsite(url_new)
            
-            self.salePostStrategy.excuteCrawl()
-            print(self.salePostStrategy.sale.__dict__)
+            self.pool.add_task(Task(url_new, self.excuteCrawlSalePost, args=(url_new,)))
 
     def excuteCrawlSalePost(self, url):
-        if self.salePostStrategy is None:
-            strategy = BatDongSanStrategy(url=url)
-            self.setSalePostStrategy(strategy=strategy)
-        else:
-            self.salePostStrategy.changeWebsite(url)
+        salePostStrategy = BatDongSanStrategy(url=url)
         
-        self.salePostStrategy.excuteCrawl()
-        print(self.salePostStrategy.sale.__dict__)
-        print(self.salePostStrategy.apartmentAddress.__dict__)
-        print(self.salePostStrategy.apartmentInfo.__dict__)
+        salePostStrategy.excuteCrawl()

@@ -1,8 +1,5 @@
 class Task:
-    def __init__(self, func, args=(), kwargs=None):
-        self.func = func
+    def __init__(self, task_id, task_function, args=()):
+        self.task_id = task_id
+        self.task_function = task_function
         self.args = args
-        self.kwargs = kwargs or {}
-
-    def execute(self):
-        return self.func(*self.args, **self.kwargs)
