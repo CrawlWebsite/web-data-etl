@@ -4,7 +4,6 @@ from core.website.website import Website
 class BatDongSanWebsite(Website):
     def __init__(self, url):
         super().__init__(url)
-        self.phoneDecryptDriver = WebDriver()
 
 class BatDongSanWebsiteFactory:
     def create(url):
