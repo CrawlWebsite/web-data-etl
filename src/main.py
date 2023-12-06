@@ -4,8 +4,8 @@ from worker_pool.pool import Pool
 from worker_pool.task import Task
 
 
-def handleCrawlRequest(url):
-    print(url)
+def handleCrawlRequest(message):
+    print(message)
 
     context = BatDongSanContext(url='https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex')
 
