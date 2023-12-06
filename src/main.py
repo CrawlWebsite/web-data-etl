@@ -17,7 +17,3 @@ if __name__ == '__main__':
 
     queue = MessageQueueImpl()
     queue.consumerSubcribe('website.crawl', handleCrawlRequest)
-
-
-    # results = pool.get_results()
-    # print(results)
