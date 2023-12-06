@@ -4,8 +4,8 @@ from worker_pool.pool import Pool
 from worker_pool.task import Task
 
 
-def handleCrawlRequest(url):
-    print(url)
+def handleCrawlRequest(message):
+    print(message)
 
     context = BatDongSanContext(url='https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex')
 
@@ -17,7 +17,3 @@ if __name__ == '__main__':
 
     queue = MessageQueueImpl()
     queue.consumerSubcribe('website.crawl', handleCrawlRequest)
-
-
-    # results = pool.get_results()
-    # print(results)

@@ -8,7 +8,6 @@ env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
   REPO_NAME: ${{secrets.REPO_NAME}}
-  IMAGE_TAG: ${{secrets.IMAGE_TAG}}
   SERVICE_NAME: web-collector
   COMPOSE_FILE: docker-compose.stg.yml
 
@@ -19,7 +18,7 @@ jobs:
       name: stg
     strategy:
       matrix:
-        python-version: [3.10]
+        python-version: ['3.10']
 
     steps:
       - uses: actions/checkout@v2
@@ -28,12 +27,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Docker login
-        run: | # log into docker hub account
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Read version from version.py
+        id: version
+        run: echo "::set-output name=version::$(python -c "exec(open('version.py').read()); print(__version__)")"
 
-      # Build & Push the Docker image
-      - name: Build & Push the Docker image
-        run: |
-          docker build -t $DOCKER_USER/$REPO_NAME:$IMAGE_TAG . &&
-          docker push $DOCKER_USER/$REPO_NAME:$IMAGE_TAG
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.DOCKER_USER }}/${{ env.REPO_NAME }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_USER }}/${{ env.SERVICE_NAME }}:${{ steps.version.outputs.version }}
+          labels: ${{ steps.meta.outputs.labels }}
