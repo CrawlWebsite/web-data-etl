@@ -46,5 +46,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ secrets.DOCKER_USER }}/web-collector:${{secrets.IMAGE_TAG}}
           labels: ${{ steps.meta.outputs.labels }}
