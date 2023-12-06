@@ -1,10 +1,13 @@
-import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By 
-import time 
+from selenium import webdriver
+from config.envVar import API_HOST
+
+
+from config.logger import LoggerCustom 
 
 class WebDriver: 
     def __init__(self):
-        options = uc.ChromeOptions()
+        options = webdriver.ChromeOptions()
 
         # Set options to make the ChromeDriver less detectable
         options.add_argument('--headless')  # Run Chrome in headless mode (without GUI)
@@ -14,16 +17,17 @@ class WebDriver:
         options.add_argument('--enable-blink-features=DisableJavaScript')  # Disable JavaScript execution
 
         # Initialize Chrome WebDriver with the specified options
-        self.driver = uc.Chrome(options=options)
+        self.driver = webdriver.Chrome(options=options)
+        self.logger = LoggerCustom(WebDriver.__name__)
+
 
     def getPageContent(self, url_crawl, cmd, postData=None):
-        url = f"http://localhost:3000/api/web-page?cmd={cmd}&path={url_crawl}"
+        url = f"{API_HOST}/api/web-page?cmd={cmd}&path={url_crawl}"
         if postData:
             url = url + f'&postData={postData}'
 
         self.driver.get(url)
-        time.sleep(2)
-        print(f"Get page {url_crawl} successful")
+        self.logger.info(f"Get page {url_crawl} successful")
 
     
     def getElementByClass(self, className):

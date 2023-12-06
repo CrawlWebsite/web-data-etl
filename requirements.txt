@@ -36,9 +36,9 @@ virtualenv==20.23.0
 websocket-client==1.5.1
 websockets==11.0.3
 requests
-selenium==4.15.2
 click==8.1.7
 coloredlogs==15.0.1
 kafka-python==2.0.2
 pyinstaller
-undetected_chromedriver
+selenium==4.15.2
+python-decouple==3.8

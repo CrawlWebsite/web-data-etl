@@ -9,7 +9,6 @@ class KafkaImpl(metaclass=SingletonMeta):
         self.groupId = groupId
 
         self.consumers = dict()
-        print(bootstrapServers)
         self.producer = KafkaProducer(  
             bootstrap_servers = bootstrapServers,  
             value_serializer = lambda x:dumps(x).encode('utf-8')  
