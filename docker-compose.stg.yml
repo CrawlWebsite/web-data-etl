@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  web-collector:
+    container_name: web-collector
+    image: vunam2000/web-collector
+    build:
+      context: .
+    env_file:
+      - .env
+    networks:
+      - web-collector
+ 
+networks:
+  web-collector:
+    driver: bridge

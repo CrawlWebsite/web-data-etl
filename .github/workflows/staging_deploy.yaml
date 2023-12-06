@@ -8,7 +8,7 @@ env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
   REPO_NAME: ${{secrets.REPO_NAME}}
-  IMAGE_TAG: ${{secrets.IMAGE_TAG_BE}}
+  IMAGE_TAG: ${{secrets.IMAGE_TAG}}
   SERVICE_NAME: web-collector
   COMPOSE_FILE: docker-compose.stg.yml
 
@@ -26,7 +26,7 @@ jobs:
       - name: Use Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          node-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Docker login
         run: | # log into docker hub account
