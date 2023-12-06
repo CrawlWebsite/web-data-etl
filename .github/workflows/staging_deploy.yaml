@@ -36,4 +36,5 @@ jobs:
       - name: Build & Push the Docker image
         run: |
           docker build -t $DOCKER_USER/$REPO_NAME:$IMAGE_TAG . &&
+          docker images &&
           docker push $DOCKER_USER/$REPO_NAME:$IMAGE_TAG
