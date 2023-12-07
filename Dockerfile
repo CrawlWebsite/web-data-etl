@@ -12,8 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Install binutils (includes objdump)
-RUN apt-get update && apt-get install -y binutils
-RUN apt-get install -y libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1
+RUN apt-get update && \
+    apt-get install -y \
+    chromium-driver \
+    binutils && \
+    rm -rf /var/lib/apt/lists/*
 
 # Use PyInstaller to create a standalone executable
 RUN pyinstaller --onedir src/main.py
