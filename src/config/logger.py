@@ -49,3 +49,6 @@ class LoggerCustom:
 
     def warn(self, message):
         self.logger.warning(message)
+
+    def error(self, message):
+        self.logger.error(message)

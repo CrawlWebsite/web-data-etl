@@ -15,13 +15,17 @@ def handleCrawlRequest(message):
     
 
 if __name__ == '__main__':
-    print("Running")
-    print(KAFKA_BROKERS)
-    print(API_HOST)
-    logger = LoggerCustom("Main")
-    logger.info("Running")
-    print("Running")
-    pool = Pool(num_workers=3)
+    try:
+        print("Running")
+        print(KAFKA_BROKERS)
+        print(API_HOST)
+        logger = LoggerCustom("Main")
+        logger.info("Running")
+        print("Running")
+        pool = Pool(num_workers=3)
 
-    queue = MessageQueueImpl()
-    queue.consumerSubcribe('website.crawl', handleCrawlRequest)
+        queue = MessageQueueImpl()
+        queue.consumerSubcribe('website.crawl', handleCrawlRequest)
+    except Exception as ex:
+        logger.error(ex)
+        
