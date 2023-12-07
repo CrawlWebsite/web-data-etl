@@ -2,13 +2,13 @@ import re
 from config.logger import LoggerCustom
 from selenium.webdriver.common.by import By 
 
-from core.web_driver.webDriver import WebDriver
-from core.real_estate.realEstateStrategy import RealEstateStrategy
+from modules.core.web_driver.webDriver import WebDriver
+from modules.core.real_estate.realEstateStrategy import RealEstateStrategy
 
-from entity.apartment import ApartmentAddress, ApartmentInfo
-from entity.sale import Sale
+from modules.entity.apartment import ApartmentAddress, ApartmentInfo
+from modules.entity.sale import Sale
 
-from collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
+from modules.collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
 
 
 class BatDongSanStrategy(RealEstateStrategy):
