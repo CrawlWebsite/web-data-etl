@@ -1,5 +1,5 @@
-from core.web_driver.webDriver import WebDriver
-from core.website.website import Website
+from modules.core.web_driver.webDriver import WebDriver
+from modules.core.website.website import Website
 
 class BatDongSanWebsite(Website):
     def __init__(self, url):

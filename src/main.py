@@ -1,9 +1,8 @@
-from collector.batdongsan.batdongsanContext import BatDongSanContext
 from config.envVar import API_HOST, KAFKA_BROKERS
 from config.logger import LoggerCustom
 from message_queue.index import MessageQueueImpl
+from modules.collector.batdongsan.batdongsanContext import BatDongSanContext
 from worker_pool.pool import Pool
-from worker_pool.task import Task
 
 
 def handleCrawlRequest(message):

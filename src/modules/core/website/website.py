@@ -1,5 +1,5 @@
 from selenium.webdriver.common.by import By 
-from core.web_driver.webDriver import WebDriver
+from modules.core.web_driver.webDriver import WebDriver
 
 
 class Website():

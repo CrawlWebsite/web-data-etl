@@ -1,5 +1,4 @@
-from collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
-from selenium.webdriver.common.by import By
+from modules.collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
 from worker_pool.pool import Pool
 
 from worker_pool.task import Task
