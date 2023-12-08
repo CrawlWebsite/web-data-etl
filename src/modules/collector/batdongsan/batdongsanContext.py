@@ -1,3 +1,5 @@
+from config.envVar import API_HOST
+from message_queue.index import MessageQueueProducerImpl
 from modules.collector.batdongsan.batdongsanStrategy import BatDongSanStrategy
 from worker_pool.pool import Pool
 
@@ -12,6 +14,7 @@ class BatDongSanContext:
 
     def __init__(self, url):
         self.pool = Pool()
+        self.message_queue = MessageQueueProducerImpl()
         self.mainStrategy = BatDongSanStrategy(url=url)
         self.salePostStrategy = None
 
@@ -21,14 +24,14 @@ class BatDongSanContext:
 
     def crawlSalePostUrls(self):
         elements = self.mainStrategy.website.getElementByClass("js__product-link-for-product-id")
+
         self.salePostUrls = [element.get_attribute("href") for element in elements]
-        print(self.salePostUrls)
 
     def excuteCrawl(self):
         self.crawlSalePostUrls()
-
+        print(self.salePostUrls)
         for salePostUrl in self.salePostUrls:
-            url_new = salePostUrl.replace('http://localhost:3000','https://batdongsan.com.vn')
+            url_new = salePostUrl.replace(API_HOST,'https://batdongsan.com.vn')
 
            
             self.pool.add_task(Task(url_new, self.excuteCrawlSalePost, args=(url_new,)))
@@ -36,4 +39,7 @@ class BatDongSanContext:
     def excuteCrawlSalePost(self, url):
         salePostStrategy = BatDongSanStrategy(url=url)
         
-        salePostStrategy.excuteCrawl()
+        data = salePostStrategy.excuteCrawl()
+
+        print(data)
+        self.message_queue.sendMessage('website.crawl.data', data)

@@ -27,6 +27,7 @@ class WebDriver:
             url = url + f'&postData={postData}'
 
         self.driver.get(url)
+        self.driver.maximize_window()
         self.logger.info(f"Get page {url_crawl} successful")
 
     

@@ -1,3 +1,10 @@
+from enum import Enum
+
+class LegalStatus(Enum):
+    LAND_TITLE_DEED = 'land_title_deed'
+    SALE_AGREEMENT = 'sale_agreement'
+    OTHER = 'other'
+
 class ApartmentAddress:
     city: str
     district: str
@@ -31,7 +38,7 @@ class ApartmentAddress:
 class ApartmentInfo:
     acreage: str
     type: str
-    juridical: str
+    legalStatus: str
     apartmentFloor: int
     numberOfBedRoom: int
     numberOfToilet: int
@@ -54,8 +61,14 @@ class ApartmentInfo:
     def getType(self):
         return self.type
 
-    def setJuridical(self, juridicalType):
-        self.juridicalType = juridicalType
+    def setLegalStatus(self, legalStatusText):
+        match legalStatusText:
+            case 'Sổ đỏ/ Sổ hồng':
+                self.legalStatus = LegalStatus.LAND_TITLE_DEED
+            case 'Hợp đồng mua bán':
+                self.legalStatus = LegalStatus.SALE_AGREEMENT
+            case _:
+                self.legalStatus = LegalStatus.OTHER
 
     def getJuridical(self):
         return self.juridicalType

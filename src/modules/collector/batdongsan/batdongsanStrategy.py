@@ -35,10 +35,10 @@ class BatDongSanStrategy(RealEstateStrategy):
         self.crawlName()
         self.crawlPhoneNumber()
 
-        self.logger.info("Crawling sale successfully")
+        self.logger.info(f"Crawling sale successfully: {self.sale.__dict__}")
 
     def crawlApartmentAddress(self):
-        self.logger.info("Crawling address ...")
+        self.logger.info("Crawling apartment address ...")
 
         addressElements = self.website.getElementByCssSelector(css_selector='div.js__breadcrumb a')
 
@@ -50,20 +50,22 @@ class BatDongSanStrategy(RealEstateStrategy):
             self.updateApartmentAddressByLevel(level, value)
     
         # Crawl project
-        projectElement = self.website.getElementByCssSelector(css_selector='div.re__project-title')[0]
-        project = projectElement.get_attribute('innerHTML')
-        self.apartmentAddress.setProject(project)
+        projectElement = self.website.getElementByCssSelector(css_selector='div.re__project-title')
+        if projectElement and projectElement[0]:
+            project = projectElement[0].get_attribute('innerHTML')
+            self.apartmentAddress.setProject(project)
 
         # Crawl address
-        addressElement = self.website.getElementByCssSelector(css_selector='span.js__pr-address')[0]
-        address = addressElement.get_attribute('innerHTML')
-        self.apartmentAddress.setAddress(address)
+        addressElement = self.website.getElementByCssSelector(css_selector='span.js__pr-address')
+        if addressElement and addressElement[0]:
+            address = addressElement[0].get_attribute('innerHTML')
+            self.apartmentAddress.setAddress(address)
 
-        self.logger.info("Crawling address successfully")
+        self.logger.info(f"Crawling apartment address successfully: {self.apartmentAddress.__dict__}")
 
 
     def crawlApartmentInfo(self):
-        self.logger.info("Crawling information ...")
+        self.logger.info("Crawling apartment information ...")
 
         infoElements = self.website.getElementByCssSelector(css_selector='div.re__pr-specs-content-item')
         
@@ -76,17 +78,15 @@ class BatDongSanStrategy(RealEstateStrategy):
 
             self.updateApartmentInfoByIconClass(iconClass, value)
 
-        self.logger.info("Crawling information successfully")
+        self.logger.info(f"Crawling apartment information successfully: {self.apartmentInfo.__dict__}")
 
 
     def crawlName(self):
         nameElement = self.website.getElementByCssSelector("div.re__contact-name.js_contact-name")
 
-        name = ''
         if nameElement and nameElement[0]:
             name = nameElement[0].get_attribute('title')
-
-        self.sale.setName(name)
+            self.sale.setName(name)
 
 
     def crawlPhoneNumber(self):
@@ -97,7 +97,6 @@ class BatDongSanStrategy(RealEstateStrategy):
             return ''
         
         phoneRaw = phoneElement[0].get_attribute('raw')
-        print(phoneRaw)
 
         # Call API to decrypt phone raw
         self.phoneDecryptDriver.getPageContent(cmd='post', url_crawl=self.phoneDecryptUrl, postData=f'PhoneNumber={phoneRaw}')
@@ -128,7 +127,7 @@ class BatDongSanStrategy(RealEstateStrategy):
             case "re__icon-bath":
                 self.apartmentInfo.setNumberOfToilet(value)
             case "re__icon-document":
-                self.apartmentInfo.setJuridical(value)
+                self.apartmentInfo.setLegalStatus(value)
             case "re__icon-interior": 
                 self.apartmentInfo.setInterior(value)
             case "re__icon-apartment":
@@ -140,8 +139,11 @@ class BatDongSanStrategy(RealEstateStrategy):
             self.crawlApartmentInfo()
             self.crawlApartmentAddress()
 
-            print(self.sale.__dict__)
-            print(self.apartmentAddress.__dict__)
-            print(self.apartmentInfo.__dict__)
+            return {
+                'sale': self.sale.__dict__,
+                'apartmentAddress': self.apartmentAddress.__dict__,
+                'apartmentInfo': self.apartmentInfo.__dict__,
+            }
+
         except Exception as ex:
             print("Exception: ", ex)
