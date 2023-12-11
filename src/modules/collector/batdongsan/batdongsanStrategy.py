@@ -8,7 +8,7 @@ from modules.core.real_estate.realEstateStrategy import RealEstateStrategy
 from modules.entity.apartment import ApartmentAddress, ApartmentInfo
 from modules.entity.sale import Sale
 
-from modules.collector.batdongsan.batdongsanWebsite import BatDongSanWebsite, BatDongSanWebsiteFactory
+from modules.collector.batdongsan.batdongsanWebsite import BatDongSanSearchPageWebsite, BatDongSanSearchPageWebsiteFactory, BatDongSanWebsite, BatDongSanWebsiteFactory
 
 
 class BatDongSanStrategy(RealEstateStrategy):
@@ -18,6 +18,7 @@ class BatDongSanStrategy(RealEstateStrategy):
     def __init__(self, url):
         self.logger = LoggerCustom(BatDongSanStrategy.__name__)
         self.website = BatDongSanWebsiteFactory.create(url)
+        self.url = url
       
         self.phoneDecryptDriver = WebDriver()
         self.phoneDecryptUrl = 'https://batdongsan.com.vn/Product/ProductDetail/DecryptPhone'
@@ -78,6 +79,19 @@ class BatDongSanStrategy(RealEstateStrategy):
 
             self.updateApartmentInfoByIconClass(iconClass, value)
 
+        # Crawl price
+        priceWrapElement = self.website.getElementByCssSelector(css_selector='div.re__pr-short-info-item.js__pr-short-info-item')[0]
+        priceValueElements = priceWrapElement.find_elements(By.CSS_SELECTOR, 'span')
+
+        if len(priceValueElements) == 3:
+            for priceValueElement in priceValueElements:
+                if priceValueElement.get_attribute('class') == 'value':
+                    value = priceValueElement.get_attribute("innerHTML")
+                    self.apartmentInfo.setPrice(value)
+                if priceValueElement.get_attribute('class') == 'ext':
+                    value = priceValueElement.get_attribute("innerHTML")
+                    self.apartmentInfo.setPricePerSquareMeter(value)
+        
         self.logger.info(f"Crawling apartment information successfully: {self.apartmentInfo.__dict__}")
 
 
@@ -127,23 +141,50 @@ class BatDongSanStrategy(RealEstateStrategy):
             case "re__icon-bath":
                 self.apartmentInfo.setNumberOfToilet(value)
             case "re__icon-document":
-                self.apartmentInfo.setLegalStatus(value)
+                self.apartmentInfo.setLegal(value)
             case "re__icon-interior": 
                 self.apartmentInfo.setInterior(value)
             case "re__icon-apartment":
                 self.apartmentInfo.setNumberOfFloor(value)
 
     def excuteCrawl(self):
+        self.logger.info(f"Crawling {self.url} ...")
+
         try:
             self.crawlSale()
             self.crawlApartmentInfo()
             self.crawlApartmentAddress()
 
             return {
+                'url': self.url,
                 'sale': self.sale.__dict__,
                 'apartmentAddress': self.apartmentAddress.__dict__,
                 'apartmentInfo': self.apartmentInfo.__dict__,
             }
 
+        except Exception as ex:
+            print("Exception: ", ex)
+
+class BatDongSanSearchPageStrategy():
+    website: BatDongSanSearchPageWebsite
+
+    def __init__(self, url):
+        self.logger = LoggerCustom(BatDongSanStrategy.__name__)
+        self.url = url
+      
+    def changeWebsite(self, url):
+        self.website.changeUrl(url)
+
+    def excuteCrawl(self):
+        self.logger.info(f"Crawling {self.url} ...")
+
+        self.website = BatDongSanSearchPageWebsiteFactory.create(self.url)
+
+        try:
+            elements = self.website.getElementByClass("js__product-link-for-product-id")
+
+            salePostUrls = [element.get_attribute("href") for element in elements]
+
+            return salePostUrls
         except Exception as ex:
             print("Exception: ", ex)

@@ -37,20 +37,25 @@ class ApartmentAddress:
 
 class ApartmentInfo:
     acreage: str
+    acreageUnit: str
     type: str
+    legal: str
     legalStatus: str
     apartmentFloor: int
     numberOfBedRoom: int
     numberOfToilet: int
     numberOfFloor: int
     pricePerSquareMeter: str
+    pricePerSquareMeterUnit: str
     price: str
+    priceUnit: str
     balconyDirection: str
     apartmentDirection: str
     interior: str
 
-    def setAcreage(self, acreage):
-        self.acreage = acreage
+    def setAcreage(self, acreageText):
+        if acreageText is not None:
+            self.acreage, self.acreageUnit = acreageText.split(" ")
 
     def getAcreage(self):
         return self.acreage
@@ -61,17 +66,15 @@ class ApartmentInfo:
     def getType(self):
         return self.type
 
-    def setLegalStatus(self, legalStatusText):
-        match legalStatusText:
+    def setLegal(self, legal):
+        self.legal = legal
+        match legal:
             case 'Sổ đỏ/ Sổ hồng':
-                self.legalStatus = LegalStatus.LAND_TITLE_DEED
+                self.legalStatus = LegalStatus.LAND_TITLE_DEED.value
             case 'Hợp đồng mua bán':
-                self.legalStatus = LegalStatus.SALE_AGREEMENT
+                self.legalStatus = LegalStatus.SALE_AGREEMENT.value
             case _:
-                self.legalStatus = LegalStatus.OTHER
-
-    def getJuridical(self):
-        return self.juridicalType
+                self.legalStatus = LegalStatus.OTHER.value
 
     def setApartmentFloor(self, apartmentFloor):
         self.apartmentFloor = apartmentFloor
@@ -80,19 +83,22 @@ class ApartmentInfo:
         return self.apartmentFloor
 
     def setNumberOfBedRoom(self, numberOfBedRoom):
-        self.numberOfBedRoom = numberOfBedRoom
+        if numberOfBedRoom is not None:
+            self.numberOfBedRoom = numberOfBedRoom.split(' ')[0]
 
     def getNumberOfBedRoom(self):
         return self.numberOfBedRoom
 
     def setNumberOfToilet(self, numberOfToilet):
-        self.numberOfToilet = numberOfToilet
+        if numberOfToilet is not None:
+            self.numberOfToilet = numberOfToilet.split(' ')[0]
 
     def getNumberOfToilet(self):
         return self.numberOfToilet
 
     def setPricePerSquareMeter(self, pricePerSquareMeter):
-        self.pricePerSquareMeter = pricePerSquareMeter
+        if pricePerSquareMeter is not None:
+            self.pricePerSquareMeter, self.pricePerSquareMeterUnit = pricePerSquareMeter.split(' ')
 
     def getPricePerSquareMeter(self):
         return self.pricePerSquareMeter
@@ -104,7 +110,9 @@ class ApartmentInfo:
         return self.numberOfFloor
     
     def setPrice(self, price):
-        self.price = price
+        if price is not None:
+            print(price)
+            self.price, self.priceUnit = price.split(' ')
 
     def getPrice(self):
         return self.price

@@ -22,6 +22,7 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
+        
         return formatter.format(record)
 
 class LoggerCustom:
@@ -31,7 +32,7 @@ class LoggerCustom:
         self.context = context
         self.logger = logging.getLogger(context)
         self.logger.setLevel(logging.DEBUG)
-
+        
         logging.setLogRecordFactory(logging.LogRecord)
 
         ch = logging.StreamHandler(sys.stdout)
@@ -42,13 +43,14 @@ class LoggerCustom:
 
         ch.setFormatter(formatter)
 
-        self.logger.addHandler(ch)
+        if not self.logger.hasHandlers():
+            self.logger.addHandler(ch)
 
     def info(self, message):
         self.logger.info(message)
 
     def warn(self, message):
-        self.logger.warning(message)
+        self.logger.warn(message)
 
     def error(self, message):
         self.logger.error(message)
