@@ -6,9 +6,11 @@ from modules.core.web_driver.webDriver import WebDriver
 from modules.core.real_estate.realEstateStrategy import RealEstateStrategy
 
 from modules.entity.apartment import ApartmentAddress, ApartmentInfo
+from modules.entity.apartmentSale import ApartmentSale
 from modules.entity.sale import Sale
 
 from modules.collector.batdongsan.batdongsanWebsite import BatDongSanSearchPageWebsite, BatDongSanSearchPageWebsiteFactory, BatDongSanWebsite, BatDongSanWebsiteFactory
+from utils.numberFormat import stringToNumber
 
 
 class BatDongSanStrategy(RealEstateStrategy):
@@ -26,79 +28,104 @@ class BatDongSanStrategy(RealEstateStrategy):
         self.sale = Sale()
         self.apartmentAddress = ApartmentAddress()
         self.apartmentInfo = ApartmentInfo()
+        self.apartmentSale = ApartmentSale()
 
     def changeWebsite(self, url):
         self.website.changeUrl(url)
 
     def crawlSale(self):
-        self.logger.info("Crawling sale ...")
+        try:
+            self.logger.info("Crawling sale ...")
 
-        self.crawlName()
-        self.crawlPhoneNumber()
+            self.crawlName()
+            self.crawlPhoneNumber()
 
-        self.logger.info(f"Crawling sale successfully: {self.sale.__dict__}")
+            self.logger.info(f"Crawling sale successfully: {self.sale.__dict__}")
+        except Exception as ex:
+            print(ex)
 
     def crawlApartmentAddress(self):
-        self.logger.info("Crawling apartment address ...")
+        try:
+            self.logger.info("Crawling apartment address ...")
 
-        addressElements = self.website.getElementByCssSelector(css_selector='div.js__breadcrumb a')
+            addressElements = self.website.getElementByCssSelector(css_selector='div.js__breadcrumb a')
 
-        # Crawl city and district
-        for addressElement in addressElements:
-            level = addressElement.get_attribute('level')
-            value = addressElement.get_attribute('innerHTML')
+            # Crawl city and district
+            for addressElement in addressElements:
+                level = addressElement.get_attribute('level')
+                value = addressElement.get_attribute('innerHTML')
 
-            self.updateApartmentAddressByLevel(level, value)
-    
-        # Crawl project
-        projectElement = self.website.getElementByCssSelector(css_selector='div.re__project-title')
-        if projectElement and projectElement[0]:
-            project = projectElement[0].get_attribute('innerHTML')
-            self.apartmentAddress.setProject(project)
+                self.updateApartmentAddressByLevel(level, value)
+        
+            # Crawl project
+            projectElement = self.website.getElementByCssSelector(css_selector='div.re__project-title')
+            if len(projectElement) > 0:
+                project = projectElement[0].get_attribute('innerHTML')
+                self.apartmentAddress.setProject(project)
 
-        # Crawl address
-        addressElement = self.website.getElementByCssSelector(css_selector='span.js__pr-address')
-        if addressElement and addressElement[0]:
-            address = addressElement[0].get_attribute('innerHTML')
-            self.apartmentAddress.setAddress(address)
+            # Crawl address
+            addressElement = self.website.getElementByCssSelector(css_selector='span.js__pr-address')
+            if len(addressElement) > 0:
+                address = addressElement[0].get_attribute('innerHTML')
+                self.apartmentAddress.setAddress(address)
 
-        self.logger.info(f"Crawling apartment address successfully: {self.apartmentAddress.__dict__}")
-
+            self.logger.info(f"Crawling apartment address successfully: {self.apartmentAddress.__dict__}")
+        except Exception as ex:
+            print(ex)
 
     def crawlApartmentInfo(self):
-        self.logger.info("Crawling apartment information ...")
+        try:
+            self.logger.info("Crawling apartment information ...")
 
-        infoElements = self.website.getElementByCssSelector(css_selector='div.re__pr-specs-content-item')
-        
-        for infoElement in infoElements:
-            iconElement = infoElement.find_elements(By.CSS_SELECTOR, 'span i')[0]
-            iconClass = iconElement.get_attribute('class')
+            infoElements = self.website.getElementByCssSelector(css_selector='div.re__pr-specs-content-item')
+            
+            for infoElement in infoElements:
+                iconElement = infoElement.find_elements(By.CSS_SELECTOR, 'span i')
+                if len(iconElement) > 0:
+                    iconClass = iconElement[0].get_attribute('class')
+                else:
+                    iconClass = ''
 
-            valueElement = infoElement.find_elements(By.CSS_SELECTOR, 'span.re__pr-specs-content-item-value')[0]
-            value = valueElement.get_attribute('innerHTML')
+                valueElement = infoElement.find_elements(By.CSS_SELECTOR, 'span.re__pr-specs-content-item-value')
+                if len(valueElement) > 0:
+                    value = valueElement[0].get_attribute('innerHTML')
+                else: 
+                    value = None
+                self.updateApartmentInfoByIconClass(iconClass, value)
 
-            self.updateApartmentInfoByIconClass(iconClass, value)
+            # Crawl price
+            priceWrapElement = self.website.getElementByCssSelector(css_selector='div.re__pr-short-info-item.js__pr-short-info-item')
+            if len(priceWrapElement) > 0:
+                priceValueElements = priceWrapElement[0].find_elements(By.CSS_SELECTOR, 'span')
+            else:
+                priceValueElements = None
 
-        # Crawl price
-        priceWrapElement = self.website.getElementByCssSelector(css_selector='div.re__pr-short-info-item.js__pr-short-info-item')[0]
-        priceValueElements = priceWrapElement.find_elements(By.CSS_SELECTOR, 'span')
+            if len(priceValueElements) == 3:
+                for priceValueElement in priceValueElements:
+                    if priceValueElement.get_attribute('class') == 'value':
+                        value = priceValueElement.get_attribute("innerHTML")
+                        price, priceUnit = value.split(' ')
+                        print(price, priceUnit)
+                        self.apartmentInfo.setPrice(stringToNumber(price))
+                        self.apartmentInfo.setPriceUnit(priceUnit)
 
-        if len(priceValueElements) == 3:
-            for priceValueElement in priceValueElements:
-                if priceValueElement.get_attribute('class') == 'value':
-                    value = priceValueElement.get_attribute("innerHTML")
-                    self.apartmentInfo.setPrice(value)
-                if priceValueElement.get_attribute('class') == 'ext':
-                    value = priceValueElement.get_attribute("innerHTML")[1:]
-                    self.apartmentInfo.setPricePerSquareMeter(value)
-        
-        self.logger.info(f"Crawling apartment information successfully: {self.apartmentInfo.__dict__}")
+                    if priceValueElement.get_attribute('class') == 'ext':
+                        value = priceValueElement.get_attribute("innerHTML")
+                        pricePerSquareMeter, pricePerSquareMeterUnit = value.split(' ')
+                        print(pricePerSquareMeter[1:])
+                       
+                        self.apartmentInfo.setPricePerSquareMeter(stringToNumber(pricePerSquareMeter[1:]))
+                        self.apartmentInfo.setPricePerSquareMeterUnit(pricePerSquareMeterUnit)
 
+            
+            self.logger.info(f"Crawling apartment information successfully: {self.apartmentInfo.__dict__}")
+        except Exception as ex:
+            print(ex)
 
     def crawlName(self):
         nameElement = self.website.getElementByCssSelector("div.re__contact-name.js_contact-name")
 
-        if nameElement and nameElement[0]:
+        if len(nameElement) > 0:
             name = nameElement[0].get_attribute('title')
             self.sale.setName(name)
 
@@ -107,7 +134,7 @@ class BatDongSanStrategy(RealEstateStrategy):
         # Get phone raw
         phoneElement = self.website.getElementByCssSelector("div.phone.js__phone")
 
-        if not (phoneElement and phoneElement[0]):
+        if len(phoneElement) == 0:
             return ''
         
         phoneRaw = phoneElement[0].get_attribute('raw')
@@ -116,9 +143,12 @@ class BatDongSanStrategy(RealEstateStrategy):
         self.phoneDecryptDriver.getPageContent(cmd='post', url_crawl=self.phoneDecryptUrl, postData=f'PhoneNumber={phoneRaw}')
 
         # Get phone
-        phoneNumber = self.phoneDecryptDriver.getElementByCssSelector(css_selector='pre')[0].get_attribute('innerHTML')
-        phoneNumber = re.sub(r'\s', '', phoneNumber)
-
+        phoneNumberElement = self.phoneDecryptDriver.getElementByCssSelector(css_selector='pre')
+        if len(phoneNumberElement) > 0:
+            phoneNumber = re.sub(r'\s', '', phoneNumberElement[0].get_attribute('innerHTML'))
+        else:
+            phoneNumber = None
+            
         self.sale.setPhoneNumber(phoneNumber)
 
     def updateApartmentAddressByLevel(self, level, value):
@@ -131,7 +161,11 @@ class BatDongSanStrategy(RealEstateStrategy):
     def updateApartmentInfoByIconClass(self, iconClass, value):
         match iconClass:
             case "re__icon-size":
-                self.apartmentInfo.setAcreage(value)
+                acreage, acreageUnit = value.split(" ") if value is not None else [None, None]
+
+                self.apartmentInfo.setAcreage(stringToNumber(acreage))
+                self.apartmentInfo.setAcreageUnit(acreageUnit)
+
             case "re__icon-front-view":
                 self.apartmentInfo.setBalconyDirection(value)
             case "re__icon-private-house":
@@ -147,6 +181,19 @@ class BatDongSanStrategy(RealEstateStrategy):
             case "re__icon-apartment":
                 self.apartmentInfo.setNumberOfFloor(value)
 
+    def crawlApartmentSale(self):
+        try:
+            self.logger.info("Crawling apartment sale ...")
+
+            self.apartmentSale.setUrl(self.url)
+
+            startDateElement, endDateElement = self.website.getElementByCssSelector("div.re__pr-short-info-item.js__pr-config-item span.value")[:2]
+
+            self.apartmentSale.setStartDate(startDateElement.get_attribute('innerHTML'))
+            self.apartmentSale.setEndDate(endDateElement.get_attribute('innerHTML'))
+        except Exception as ex:
+            print(ex)
+
     def excuteCrawl(self):
         self.logger.info(f"Crawling {self.url} ...")
 
@@ -154,12 +201,13 @@ class BatDongSanStrategy(RealEstateStrategy):
             self.crawlSale()
             self.crawlApartmentInfo()
             self.crawlApartmentAddress()
+            self.crawlApartmentSale()
 
             return {
-                'url': self.url,
                 'sale': self.sale.__dict__,
                 'apartmentAddress': self.apartmentAddress.__dict__,
                 'apartmentInfo': self.apartmentInfo.__dict__,
+                'apartmentSale': self.apartmentSale.__dict__,
             }
 
         except Exception as ex:

@@ -60,5 +60,9 @@ class BatDongSanComposit(RealEstateComposit):
         salePostStrategy = BatDongSanStrategy(url=salePostUrl)
         
         data = salePostStrategy.excuteCrawl()
-        print(data)
+        data['publisher'] = {
+            'hostname': self.hostname
+        }
+
+        self.logger.info(f'Crawl succeeded {data}')
         self.message_queue.sendMessage('website.crawl.data', data)

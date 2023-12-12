@@ -53,13 +53,15 @@ class ApartmentInfo:
     apartmentDirection: str
     interior: str
 
-    def setAcreage(self, acreageText):
-        if acreageText is not None:
-            self.acreage, self.acreageUnit = acreageText.split(" ")
+    def setAcreage(self, acreage):
+        self.acreage = acreage
 
     def getAcreage(self):
         return self.acreage
     
+    def setAcreageUnit(self, acreageUnit):
+        self.acreageUnit = acreageUnit
+        
     def setType(self, type):
         self.type = type
 
@@ -97,11 +99,13 @@ class ApartmentInfo:
         return self.numberOfToilet
 
     def setPricePerSquareMeter(self, pricePerSquareMeter):
-        if pricePerSquareMeter is not None:
-            self.pricePerSquareMeter, self.pricePerSquareMeterUnit = pricePerSquareMeter.split(' ')
+        self.pricePerSquareMeter = pricePerSquareMeter
 
     def getPricePerSquareMeter(self):
         return self.pricePerSquareMeter
+
+    def setPricePerSquareMeterUnit(self, pricePerSquareMeterUnit):
+        self.pricePerSquareMeterUnit = pricePerSquareMeterUnit
 
     def setNumberOfFloor(self, numberOfFloor):
         self.numberOfFloor = numberOfFloor
@@ -110,13 +114,14 @@ class ApartmentInfo:
         return self.numberOfFloor
     
     def setPrice(self, price):
-        if price is not None:
-            print(price)
-            self.price, self.priceUnit = price.split(' ')
+        self.price = price
 
     def getPrice(self):
         return self.price
     
+    def setPriceUnit(self, priceUnit):
+        self.priceUnit = priceUnit
+
     def setBalconyDirection(self, balconyDirection):
         self.balconyDirection = balconyDirection
 

@@ -1,3 +1,4 @@
+from time import sleep
 from selenium.webdriver.common.by import By 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -22,13 +23,19 @@ class WebDriver:
 
 
     def getPageContent(self, url_crawl, cmd, postData=None):
-        url = f"{API_HOST}/api/web-page?cmd={cmd}&path={url_crawl}"
-        if postData:
-            url = url + f'&postData={postData}'
+        try:
+            url = f"{API_HOST}/api/web-page?cmd={cmd}&path={url_crawl}"
+            if postData:
+                url = url + f'&postData={postData}'
 
-        self.driver.get(url)
-        self.driver.maximize_window()
-        self.logger.info(f"Get page {url_crawl} successful")
+            self.driver.get(url)
+            self.driver.maximize_window()
+            self.logger.info(f"Get page {url_crawl} successful")
+        except Exception as ex:
+            print(ex)
+            sleep(10)
+            self.driver.get(url)
+
 
     
     def getElementByClass(self, className):
