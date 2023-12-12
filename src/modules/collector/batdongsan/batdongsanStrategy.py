@@ -89,7 +89,7 @@ class BatDongSanStrategy(RealEstateStrategy):
                     value = priceValueElement.get_attribute("innerHTML")
                     self.apartmentInfo.setPrice(value)
                 if priceValueElement.get_attribute('class') == 'ext':
-                    value = priceValueElement.get_attribute("innerHTML")
+                    value = priceValueElement.get_attribute("innerHTML")[1:]
                     self.apartmentInfo.setPricePerSquareMeter(value)
         
         self.logger.info(f"Crawling apartment information successfully: {self.apartmentInfo.__dict__}")
