@@ -3,7 +3,6 @@ from config.logger import LoggerCustom
 
 
 def crawlWebsiteHandler(url, pageStart, pageEnd):
-    print(url, pageStart, pageEnd)
     logger = LoggerCustom(BatDongSanContext.__name__)
     logger.info("Crawl")
 

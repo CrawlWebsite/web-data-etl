@@ -16,6 +16,10 @@ class RealEstateStrategy():
     @abstractmethod
     def crawlApartmentInfo(self):
         pass
+
+    @abstractmethod
+    def crawlApartmentSale(self):
+        pass
     
 
     

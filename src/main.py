@@ -1,31 +1,36 @@
-from collector.batdongsan.batdongsanContext import BatDongSanContext
 from config.envVar import API_HOST, KAFKA_BROKERS
 from config.logger import LoggerCustom
-from message_queue.index import MessageQueueImpl
+from message_queue.index import MessageQueueConsumerImpl
+from modules.collector.realEstateCollector import RealEstateCollector
 from worker_pool.pool import Pool
-from worker_pool.task import Task
 
 
 def handleCrawlRequest(message):
     print(message)
+    url = message.value.get('url')
+    startPage = message.value.get('startPage') or 1
+    endPage = message.value.get('endPage') or 30
 
-    context = BatDongSanContext(url='https://batdongsan.com.vn/ban-can-ho-chung-cu-goldsilk-complex')
+    if url is None:
+        return
 
-    context.excuteCrawl()
+    collector = RealEstateCollector(url=url, startPage=startPage, endPage=endPage)
+    collector.excuteCrawl()
+    
+    return
     
 
 if __name__ == '__main__':
     try:
-        print("Running")
-        print(KAFKA_BROKERS)
-        print(API_HOST)
         logger = LoggerCustom("Main")
-        logger.info("Running")
-        print("Running")
         pool = Pool(num_workers=3)
 
-        queue = MessageQueueImpl()
-        queue.consumerSubcribe('website.crawl', handleCrawlRequest)
+        logger.info("Running")
+
+        queue = MessageQueueConsumerImpl()
+        queue.consumerSubcribe('website.crawl.register', handleCrawlRequest)
+
     except Exception as ex:
+        print(ex)
         logger.error(ex)
         

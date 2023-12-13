@@ -1,3 +1,10 @@
+from enum import Enum
+
+class LegalStatus(Enum):
+    LAND_TITLE_DEED = 'land_title_deed'
+    SALE_AGREEMENT = 'sale_agreement'
+    OTHER = 'other'
+
 class ApartmentAddress:
     city: str
     district: str
@@ -30,14 +37,18 @@ class ApartmentAddress:
 
 class ApartmentInfo:
     acreage: str
+    acreageUnit: str
     type: str
-    juridical: str
+    legal: str
+    legalStatus: str
     apartmentFloor: int
     numberOfBedRoom: int
     numberOfToilet: int
     numberOfFloor: int
     pricePerSquareMeter: str
+    pricePerSquareMeterUnit: str
     price: str
+    priceUnit: str
     balconyDirection: str
     apartmentDirection: str
     interior: str
@@ -48,17 +59,24 @@ class ApartmentInfo:
     def getAcreage(self):
         return self.acreage
     
+    def setAcreageUnit(self, acreageUnit):
+        self.acreageUnit = acreageUnit
+        
     def setType(self, type):
         self.type = type
 
     def getType(self):
         return self.type
 
-    def setJuridical(self, juridicalType):
-        self.juridicalType = juridicalType
-
-    def getJuridical(self):
-        return self.juridicalType
+    def setLegal(self, legal):
+        self.legal = legal
+        match legal:
+            case 'Sổ đỏ/ Sổ hồng':
+                self.legalStatus = LegalStatus.LAND_TITLE_DEED.value
+            case 'Hợp đồng mua bán':
+                self.legalStatus = LegalStatus.SALE_AGREEMENT.value
+            case _:
+                self.legalStatus = LegalStatus.OTHER.value
 
     def setApartmentFloor(self, apartmentFloor):
         self.apartmentFloor = apartmentFloor
@@ -67,13 +85,15 @@ class ApartmentInfo:
         return self.apartmentFloor
 
     def setNumberOfBedRoom(self, numberOfBedRoom):
-        self.numberOfBedRoom = numberOfBedRoom
+        if numberOfBedRoom is not None:
+            self.numberOfBedRoom = numberOfBedRoom.split(' ')[0]
 
     def getNumberOfBedRoom(self):
         return self.numberOfBedRoom
 
     def setNumberOfToilet(self, numberOfToilet):
-        self.numberOfToilet = numberOfToilet
+        if numberOfToilet is not None:
+            self.numberOfToilet = numberOfToilet.split(' ')[0]
 
     def getNumberOfToilet(self):
         return self.numberOfToilet
@@ -83,6 +103,9 @@ class ApartmentInfo:
 
     def getPricePerSquareMeter(self):
         return self.pricePerSquareMeter
+
+    def setPricePerSquareMeterUnit(self, pricePerSquareMeterUnit):
+        self.pricePerSquareMeterUnit = pricePerSquareMeterUnit
 
     def setNumberOfFloor(self, numberOfFloor):
         self.numberOfFloor = numberOfFloor
@@ -96,6 +119,9 @@ class ApartmentInfo:
     def getPrice(self):
         return self.price
     
+    def setPriceUnit(self, priceUnit):
+        self.priceUnit = priceUnit
+
     def setBalconyDirection(self, balconyDirection):
         self.balconyDirection = balconyDirection
 
