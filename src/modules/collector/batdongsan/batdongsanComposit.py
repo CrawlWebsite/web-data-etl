@@ -10,10 +10,10 @@ from modules.core.real_estate.realEstateComposit import RealEstateComposit
 from worker_pool.pool import Pool
 
 from worker_pool.task import Task
+from config import constants
 
 
 class BatDongSanComposit(RealEstateComposit):
-    hostname = "https://batdongsan.com.vn"
     urlPattern = re.compile(r"https://batdongsan\.com\.vn/[^/]+")
     paginationPattern = "/p{}"
 
@@ -36,6 +36,13 @@ class BatDongSanComposit(RealEstateComposit):
             return
 
     def addSearchPage(self, page):
+        """
+        Add SearchPageStrategy instance to list
+
+        Args:
+            page (int): page number
+        """
+        
         if self.searchPageUrl is None:
             self.logger.warn("No search page")
             return
@@ -46,23 +53,42 @@ class BatDongSanComposit(RealEstateComposit):
         self.searchPagesStrategy.append(BatDongSanSearchPageStrategy(url=url))
 
     def excuteCrawl(self):
+        """
+        Excute crawl
+        """
+
+        """
+        Loop search pages and add excute crawl task of each page to thread pool
+        """
         for searchPageStrategy in self.searchPagesStrategy:
             # Get all sale post urls in search page
             salePostUrls = searchPageStrategy.excuteCrawl()
 
+            """
+            When crawl sale post urls,
+                we get hostname of each sale post url is the hostname of backend service
+            So we need to replace to the hostname of real estate website
+            """
             for salePostUrl in salePostUrls:
-                salePostUrl = salePostUrl.replace(API_HOST, self.hostname)
+                salePostUrl = salePostUrl.replace(API_HOST, constants.BAT_DONG_SAN_HOSTNAME)
 
-
+                # Add excute crawl task to thread pool
                 self.pool.add_task(Task(salePostUrl, self.excuteCrawlSalePost, args=(salePostUrl,)))
 
     def excuteCrawlSalePost(self, salePostUrl):
+        """
+        Crawl sale post url
+
+        Args:
+            salePostUrl (str): url of sale post
+
+        Returns:
+            Send crawl data to kafka topic
+        """
+
         salePostStrategy = BatDongSanStrategy(url=salePostUrl)
         
         data = salePostStrategy.excuteCrawl()
-        data['publisher'] = {
-            'hostname': self.hostname
-        }
 
         self.logger.info(f'Crawl succeeded {data}')
         self.message_queue.sendMessage('website.crawl.data', data)

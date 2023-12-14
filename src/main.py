@@ -14,7 +14,9 @@ def handleCrawlRequest(message):
     if url is None:
         return
 
+    # Define real state collector
     collector = RealEstateCollector(url=url, startPage=startPage, endPage=endPage)
+    # Excute crawl
     collector.excuteCrawl()
     
     return
