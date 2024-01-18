@@ -30,12 +30,6 @@
 Item Exporters are used to export/serialize items into different formats.
 """
 
-import csv
-import io
-import threading
-from json import JSONEncoder
-
-import decimal
 import six
 
 
@@ -94,73 +88,3 @@ class BaseItemExporter(object):
                 value = default_value
 
             yield field_name, value
-
-
-class HadoopExporter(BaseItemExporter):
-
-    def __init__(self, file, include_headers_line=True, join_multivalued=',', **kwargs):
-        self._configure(kwargs, dont_fail=True)
-        if not self.encoding:
-            self.encoding = 'utf-8'
-        self.include_headers_line = include_headers_line
-        self.stream = io.TextIOWrapper(
-            file,
-            line_buffering=False,
-            write_through=True,
-            encoding=self.encoding
-        ) if six.PY3 else file
-        self._headers_not_written = True
-        self._join_multivalued = join_multivalued
-        self._write_headers_lock = threading.Lock()
-
-    def serialize_field(self, field, name, value):
-        serializer = field.get('serializer', self._join_if_needed)
-        return serializer(value)
-
-    def _join_if_needed(self, value):
-        def to_string(x):
-            if isinstance(x, dict):
-                # Separators without whitespace for compact format.
-                return JSONEncoder(separators=(',', ':')).encode(x)
-            else:
-                return str(x)
-
-        if isinstance(value, (list, tuple)):
-            try:
-                return self._join_multivalued.join(to_string(x) for x in value)
-            except TypeError:  # list in value may not contain strings
-                pass
-        return value
-
-    def export_item(self, item):
-        # Double-checked locking (safe in Python because of GIL) https://en.wikipedia.org/wiki/Double-checked_locking
-        if self._headers_not_written:
-            with self._write_headers_lock:
-                if self._headers_not_written:
-                    self._write_headers_and_set_fields_to_export(item)
-                    self._headers_not_written = False
-
-        fields = self._get_serialized_fields(item, default_value='',
-                                             include_empty=True)
-        values = list(self._build_row(x for _, x in fields))
-        # self.csv_writer.writerow(values)
-
-    def _build_row(self, values):
-        for s in values:
-            try:
-                yield;
-            except TypeError:
-                yield s
-
-    def _write_headers_and_set_fields_to_export(self, item):
-        if self.include_headers_line:
-            if not self.fields_to_export:
-                if isinstance(item, dict):
-                    # for dicts try using fields of the first item
-                    self.fields_to_export = list(item.keys())
-                else:
-                    # use fields declared in Item
-                    self.fields_to_export = list(item.fields.keys())
-            row = list(self._build_row(self.fields_to_export))
-            # self.csv_writer.writerow(row)
-
